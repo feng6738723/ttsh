@@ -1,0 +1,170 @@
+{% extends 'base/base.html' %}
+{% load static %}
+	<title>天天生鲜-商品列表</title>
+
+	{% block extCSS %}
+        <link rel="stylesheet" type="text/css" href="{% static 'css/reset.css' %}">
+	    <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
+    {% endblock %}
+
+
+    {% block content %}
+	<div class="header_con">
+		<div class="header">
+			<div class="welcome fl">欢迎来到天天生鲜!</div>
+			<div class="fr">
+				<div class="login_info fl">
+					欢迎您：<em>张 山</em>
+				</div>
+				<div class="login_btn fl">
+					<a href="{% url 'userweb:login' %}">登录</a>
+					<span>|</span>
+					<a href="{% url 'userweb:register' %}">注册</a>
+				</div>
+				<div class="user_link fl">
+					<span>|</span>
+					<a href="{% url 'userweb:my' %}">用户中心</a>
+					<span>|</span>
+					<a href="{% url 'cartweb:cart' %}">我的购物车</a>
+					<span>|</span>
+					<a href="{% url 'userweb:userorder' %}">我的订单</a>
+				</div>
+			</div>
+		</div>		
+	</div>
+
+	<div class="search_bar clearfix">
+		<a href="index.html" class="logo fl"><img src="{% static 'images/logo.png' %}"></a>
+		<div class="search_con fl">
+			<input type="text" class="input_text fl" name="" placeholder="搜索商品">
+			<input type="button" class="input_btn fr" name="" value="搜索">
+		</div>
+		<div class="guest_cart fr">
+			<a href="{% url 'cartweb:cart' %}" class="cart_name fl">我的购物车</a>
+			<div class="goods_count fl">1</div>
+		</div>
+	</div>
+
+	<div class="navbar_con">
+		<div class="navbar clearfix">
+			<div class="subnav_con fl">
+				<h1>全部商品分类</h1>	
+				<span></span>			
+				<ul class="subnav">
+					{% for type in types %}
+			            <li><a href="#model0{{ forloop.counter }}" class="{{ type.logo }}">{{ type.name }}</a></li>
+                    {% endfor %}
+				</ul>
+			</div>
+			<ul class="navlist fl">
+				<li><a href="">首页</a></li>
+				<li class="interval">|</li>
+				<li><a href="">手机生鲜</a></li>
+				<li class="interval">|</li>
+				<li><a href="">抽奖</a></li>
+			</ul>
+		</div>
+	</div>
+
+	<div class="breadcrumb">
+		<a href="#">全部分类</a>
+		<span>></span>
+		<a href="#">{{ good_type.name }}</a>
+	</div>
+
+	<div class="main_wrap clearfix">
+		<div class="l_wrap fl clearfix">
+			<div class="new_goods">
+				<h3>新品推荐</h3>
+				<ul>
+                    {% for sku in news_sku %}
+					<li>
+						<a href="{% url 'goodweb:detail' sku.id %}"><img src="{{ sku.image.url }}"></a>
+						<h4><a href="{% url 'goodweb:detail' sku.id %}">{{ sku.name }}</a></h4>
+						<div class="prize">￥{{ sku.price }}</div>
+					</li>
+                    {% endfor %}
+				</ul>
+			</div>
+		</div>
+
+		<div class="r_wrap fr clearfix">
+			<div class="sort_bar">
+				<a href="{% url 'goodweb:list' good_type.id 1 %}" {% if sort == 'default' %} class="active"{% endif %}>默认</a>
+				<a href="{% url 'goodweb:list' good_type.id 1 %}?sort=price" {% if sort == 'price' %} class="active"{% endif %}>价格</a>
+				<a href="{% url 'goodweb:list' good_type.id 1 %}?sort=hot" {% if sort == 'hot' %} class="active"{% endif %}>人气</a>
+			</div>
+
+			<ul class="goods_type_list clearfix">
+				{% for sku in skus_page %}
+                    <li>
+                        <a href="{% url 'goods:detail' sku.id %}"><img src="{{ sku.image.url }}"></a>
+                        <h4><a href="{% url 'goods:detail' sku.id %}">{{ sku.name }}</a></h4>
+                        <div class="operate">
+                            <span class="prize">￥{{ sku.price }}</span>
+                            <span class="unit">{{ sku.price }}/{{ sku.unite }}</span>
+                            <a href="javascript:;" class="add_goods" title="加入购物车" sku_id="{{ sku.id }}"></a>
+                        </div>
+				    </li>
+                {% endfor %}
+			</ul>
+
+			<div class="pagenation">
+				{% if skus_page.has_previous %}
+				    <a href="{% url 'goodweb:list' good_type.id skus_page.previous_page_number %}?sort={{ sort }}">上一页</a>
+                {% endif %}
+                {% for pindex in pages %}
+                    {% if pindex == skus_page.number %}
+				        <a href="{% url 'goodweb:list' good_type.id pindex %}?sort={{ sort }}" class="active">{{ pindex }}</a>
+                    {% else %}
+				        <a href="{% url 'goodweb:list' good_type.id pindex %}?sort={{ sort }}">{{ pindex }}</a>
+                    {% endif %}
+				{% endfor %}
+                {% if skus_page.has_next %}
+				    <a href="{% url 'goodweb:list' good_type.id skus_page.next_page_number %}?sort={{ sort }}">下一页></a>
+                {% endif %}
+			</div>
+		</div>
+	</div>
+    {% endblock %}
+
+
+    <script type="text/javascript" src="{% static 'js/jquery-1.12.4.min.js'%}"></script>
+	<script type="text/javascript">
+		//添加购物车
+		$('.add_goods').click(function () {
+			var sku_id = $(this).attr('sku_id'),
+				count = 1;
+			var params = {'sku_id':sku_id,'count':count}
+
+			var add_x = $(this).offset().left;
+			var add_y = $(this).offset().top;
+
+			var to_x = $('#show_count').offset().left;
+			var to_y = $('#show_count').offset().top;
+
+			$.post('/cart/add',params,function (data) {
+				if(data.res == 5){
+                    // 添加成功
+					$(".add_jump").css({'left':add_x+80,'top':add_y+10,'display':'block'})
+                    $(".add_jump").stop().animate({
+                        'left': to_x+7,
+                        'top': to_y+7},
+                        "fast", function() {
+                            $(".add_jump").fadeOut('fast',function(){
+                                // 重新设置用户购物车中商品的条目数
+                                $('#show_count').html(data.total_count);
+                            });
+			        });
+                } else {
+                    // 添加失败
+                    alert(data.errmsg)
+                }
+            })
+        })
+
+	</script>
+
+    {% block footer %}
+        {{ block.super }}
+    {% endblock %}
