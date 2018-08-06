@@ -2,14 +2,11 @@ from django.conf.urls import url
 
 from order import views
 urlpatterns = [
-    # 下单
-    url(r'^orderweb/', views.order, name='orderweb'),
-    # 商品支付的页面
-    url(r'^orderinfo/', views.orderinfo, name='orderinfo'),
-    # 修改订单的状态
-    url(r'^changeorderstatus/', views.changeorderstatus, name='changeorderstatus'),
-    # 待收货
-    url(r'^payed/', views.payed, name='payed'),
-    # 待付款
-    url(r'^waitpay/', views.waitpay, name='waitpay')
+    # 创建订单操作
+    url(r'^orderweb/', views.create, name='create'),
+    # 提交订单,生成订单数据
+    url(r'^commit/', views.commit, name='commit'),
+    # 订单支付页面
+    url(r'^pay/', views.pay, name='pay'),
+
 ]

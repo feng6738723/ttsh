@@ -16,6 +16,7 @@
     {% block extJS %}
         <script type="text/javascript" src="{% static 'js/jquery-1.12.4.min.js' %}"></script>
 	    <script type="text/javascript" src="{% static 'js/register.js' %}"></script>
+
     {% endblock %}
 
 
@@ -33,8 +34,9 @@
 				<a href="{% url 'userweb:login' %}">登录</a>
 			</div>
 			<div class="reg_form clearfix">
-                {% csrf_token %}
-				<form action="" method="post">
+
+				<form action="{% url 'userweb:register' %}" method="post">
+                    {% csrf_token %}
 				<ul>
 					<li>
 						<label>用户名:</label>
@@ -66,10 +68,12 @@
 					</li>
 				</ul>				
 				</form>
+                {{ msg }}
 			</div>
 		</div>
 	</div>
     {% endblock %}
+
 
     {% block footer %}
         {{ block.super }}

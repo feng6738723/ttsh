@@ -6,7 +6,9 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from user.models import User, UserTicket
+from cart.models import CartModel
+from goods.models import GoodsSKU
+from user.models import User, UserTicket, Address
 from utils.functions import get_ticket
 
 
@@ -42,9 +44,10 @@ def register(request):
         password = make_password(password)
 
         # 进行用户的创建,将获取的值带入到用户表中进行存储
-        User.objects.create(username=username, password=password,
+        User.objects.create(username=username,
+                            password=password,
                             email=email,)
-        return HttpResponseRedirect(reverse('user:login'))
+        return HttpResponseRedirect(reverse('userweb:login'))
 
 
 def login(request):
@@ -62,13 +65,15 @@ def login(request):
         if User.objects.filter(username=username).exists():
             user = User.objects.get(username=username)
             if check_password(password, user.password):
-                res = HttpResponseRedirect(reverse('url:my'))
+                res = HttpResponseRedirect(reverse('userweb:my'))
                 # 获取cookie值
                 ticket = get_ticket()
                 out_time = datetime.now() + timedelta(days=30)
-                res.set_cookie('ticket', ticket ,expires=out_time)
+                res.set_cookie('ticket', ticket, expires=out_time)
                 # 将cookie值存到数据库中
-                UserTicket.objects.create(user=user, ticket=ticket, out_time=out_time)
+                UserTicket.objects.create(user=user,
+                                          ticket=ticket,
+                                          out_time=out_time)
                 return res
             else:
                 data['msg'] = '密码错误'
@@ -83,6 +88,29 @@ def logout(request):
     # 登出
     request.session.flush()
     return redirect('/')
+
+
+def userinfo(request):
+    if request.method == 'GET':
+        # 获取用户的个人信息
+        user = request.user
+        addr = Address.objects.get_default_address(user)
+
+        # 获取用户最近的订单
+        sku_id = request.POST.get('sku_id')
+        sku_ids = CartModel.objects.filter(user=user, sku_id=sku_id).first()
+        goods_li = []
+        for id in sku_ids:
+            good = GoodsSKU.objects.get(id=id)
+            goods_li.append(good)
+
+        data = {
+            'page': 'user',
+            'address': addr,
+            'goods_li': goods_li
+        }
+
+        return render(request, 'userweb/user_center_info.html', data)
 
 
 def address(request):

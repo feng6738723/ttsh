@@ -2,14 +2,13 @@ from django.http import JsonResponse
 from django.shortcuts import render
 
 from cart.models import CartModel
-from goods.models import GoodsSKU
 
 
 def Cart(request):
     # 购物车
     if request.method == 'GET':
-        user = request.user
-        skus = CartModel.objects.filter(user=user)
+        # user = request.user
+        skus = CartModel.objects.all()
 
         return render(request, 'cartweb/cart.html', {'skus': skus})
 
